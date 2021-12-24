@@ -1,8 +1,9 @@
 'use strict';
 
 const express = require('express');
-const uuid = require('uuid')
-const bodyparser = require('body-parser')
+const uuid = require('uuid');
+const bodyparser = require('body-parser');
+const cors = require('cors');
 
 // Constants
 const PORT = 8080;
@@ -124,6 +125,11 @@ var todo = new TodoList( makeTodoItems(initialValues) );
 // App
 const app = express();
 
+app.use(cors(
+  {
+    "origin": [/192\.168\.1\..*/, /\.fd93\.me$/]
+  }
+))
 app.use(bodyparser.json())
 
 app.get('/', (req, res) => {
