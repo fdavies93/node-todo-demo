@@ -64,6 +64,21 @@ class TodoList {
   }
 
   /**
+   * @param {string} id 
+   * @param {Object} newState
+   * @returns {Object} Updated object.
+   */
+  updateItem(id, newState) {
+    if (! (id in this.items)) return {};
+    var item = this.items[id];
+    for (const prop in newState) {
+      item[prop] = newState[prop]
+    }
+    this.items[id] = item; // just to make sure...
+    return this.items[id];
+  }
+
+  /**
    * @param {string[]} ids 
    * @returns {string[]} IDs of deleted items.
    */
@@ -119,6 +134,7 @@ function makeTodoItems(titles) {
 }
 
 const initialValues = new Array("Go to store", "Buy some eggs", "Have a good time");
+const canPatch = new Set(["text", "done"])
 
 var todo = new TodoList( makeTodoItems(initialValues) );
 
@@ -138,22 +154,33 @@ app.get('/', (req, res) => {
 
 app.patch('/:id', (req, res) => {
   var id = req.params.id;
-  if ( !("state" in req.body) ) {
-    res.status(400);
-    res.json({});
-    return
+
+  var hasValidProps = false;
+  // return true iff all props are valid and there's more than 1
+  for (const prop in req.body) {
+    if (canPatch.has(prop)) hasValidProps = true;
+    else {
+      hasValidProps = false;
+      break;
+    }
   }
 
-  var stateChanged = todo.changeItemState(id, req.body["state"]);
+  if (!hasValidProps) {
+    res.status(400);
+    res.json({});
+    return;
+  }
 
-  if (!stateChanged) {
+  var stateChanged = todo.updateItem(id, req.body);
+
+  if (Object.keys(stateChanged).length === 0) {
     res.status(404);
     res.json({});
     return
   }
 
   res.status(200);
-  res.json(todo.itemsToList());
+  res.json(stateChanged);
 })
 
 app.delete('/:id', (req, res) => {
