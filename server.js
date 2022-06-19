@@ -8,6 +8,7 @@ const cors = require('cors');
 // Constants
 const PORT = 8080;
 const HOST = '0.0.0.0';
+const cors_host = process.env.CORS_ORIGIN
 
 class TodoItem {
   /**
@@ -143,7 +144,7 @@ const app = express();
 
 app.use(cors(
   {
-    "origin": [/192\.168\.1\..*/, /\.fd93\.me$/]
+    "origin": [/192\.168\.1\..*/, /\.fd93\.me$/, /localhost/, /127.0.0.1/, cors_host]
   }
 ))
 app.use(bodyparser.json())
